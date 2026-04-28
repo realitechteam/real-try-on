@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+// ============================================
+// Virtual Try-On Models
+// ============================================
+
+// Shop settings and configuration
+model Shop {
+  id              String   @id @default(uuid())
+  shopDomain      String   @unique
+  accessToken     String?
+
+  // Feature toggles
+  isEnabled       Boolean  @default(true)
+
+  // Widget customization
+  buttonLabel     String   @default("Try It On")
+  buttonColor     String   @default("#000000")
+  buttonTextColor String   @default("#FFFFFF")
+  buttonRadius    Int      @default(8)
+  buttonPosition  String   @default("below-add-to-cart")
+  modalTheme      String   @default("light")
+
+  // Product rules
+  enabledProducts    String?
+  enabledCollections String?
+  enabledTags        String?
+  productRule        String   @default("all")
+
+  // Plan and billing
+  plan            String   @default("free")
+  monthlyQuota    Int      @default(50)
+  usedQuota       Int      @default(0)
+  quotaResetDate  DateTime?
+
+  // Timestamps
+  installedAt     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  generations     Generation[]
+  analytics       AnalyticsEvent[]
+}
+
+// Try-on generation records
+model Generation {
+  id              String   @id @default(uuid())
+  shopId          String
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Product context
+  productId       String?
+  variantId       String?
+  productTitle    String?
+
+  // Image references
+  personImageUrl  String
+  garmentImageUrl String
+  resultImageUrl  String?
+
+  // Generation metadata
+  status          String   @default("pending")
+  provider        String   @default("fashn")
+  providerJobId   String?
+  errorMessage    String?
+  processingTimeMs Int?
+
+  // Shopper context (anonymized)
+  sessionId       String?
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?
+}
+
+// Analytics events
+model AnalyticsEvent {
+  id          String   @id @default(uuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  eventType   String
+  productId   String?
+  variantId   String?
+  sessionId   String?
+  metadata    String?
+
+  createdAt   DateTime @default(now())
+}

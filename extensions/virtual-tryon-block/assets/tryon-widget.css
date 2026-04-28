@@ -1,0 +1,479 @@
+/* ========================================
+   Virtual Try-On Widget Styles
+   Scoped to .vto-* to avoid theme conflicts
+   ======================================== */
+
+/* Button */
+.vto-container {
+  margin: 12px 0;
+}
+
+.vto-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.vto-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.08);
+}
+
+.vto-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.vto-button__icon {
+  display: flex;
+  align-items: center;
+}
+
+/* Modal Overlay */
+.vto-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.vto-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  animation: vtoFadeIn 0.2s ease-out;
+}
+
+.vto-modal__dialog {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  animation: vtoSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vto-modal__dialog[data-theme="light"] {
+  background: #ffffff;
+  color: #1a1a2e;
+}
+
+.vto-modal__dialog[data-theme="dark"] {
+  background: #1a1a2e;
+  color: #f0f0f5;
+}
+
+.vto-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.vto-modal__dialog[data-theme="dark"] .vto-modal__header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.vto-modal__title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.vto-modal__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  color: inherit;
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.vto-modal__close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.vto-modal__dialog[data-theme="dark"] .vto-modal__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vto-modal__body {
+  padding: 24px;
+}
+
+.vto-modal__footer {
+  padding: 12px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+}
+
+.vto-modal__dialog[data-theme="dark"] .vto-modal__footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  color: #666;
+}
+
+.vto-modal__footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* Upload Area */
+.vto-upload-area {
+  border: 2px dashed rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.vto-modal__dialog[data-theme="dark"] .vto-upload-area {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.vto-upload-area:hover,
+.vto-upload-area.vto-upload-area--dragover {
+  border-color: #6c63ff;
+  background: rgba(108, 99, 255, 0.04);
+}
+
+.vto-upload-area__icon {
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.vto-upload-area__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.vto-upload-area__subtitle {
+  font-size: 14px;
+  opacity: 0.6;
+  margin: 0 0 20px;
+}
+
+.vto-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vto-upload-btn:hover {
+  background: #5a52d5;
+  transform: translateY(-1px);
+}
+
+.vto-upload-area__hint {
+  font-size: 12px;
+  opacity: 0.4;
+  margin: 12px 0 0;
+}
+
+/* Consent */
+.vto-consent {
+  margin-top: 16px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.vto-consent label {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.vto-consent input[type="checkbox"] {
+  margin-top: 2px;
+  accent-color: #6c63ff;
+}
+
+.vto-consent a {
+  color: #6c63ff;
+}
+
+/* Preview Grid */
+.vto-preview-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.vto-preview-card {
+  flex: 1;
+  text-align: center;
+}
+
+.vto-preview-card__label {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  opacity: 0.7;
+}
+
+.vto-preview-card img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.vto-modal__dialog[data-theme="dark"] .vto-preview-card img {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.vto-preview-card__plus {
+  font-size: 24px;
+  font-weight: 300;
+  opacity: 0.3;
+  flex-shrink: 0;
+}
+
+/* Generate Button */
+.vto-generate-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #6c63ff 0%, #e040fb 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 0.3px;
+}
+
+.vto-generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(108, 99, 255, 0.35);
+}
+
+.vto-generate-btn:active {
+  transform: translateY(0);
+}
+
+.vto-generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Processing */
+.vto-processing {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.vto-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(108, 99, 255, 0.2);
+  border-top-color: #6c63ff;
+  border-radius: 50%;
+  margin: 0 auto 24px;
+  animation: vtoSpin 0.8s linear infinite;
+}
+
+.vto-processing__title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.vto-processing__subtitle {
+  font-size: 14px;
+  opacity: 0.5;
+  margin: 0 0 24px;
+}
+
+.vto-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.vto-modal__dialog[data-theme="dark"] .vto-progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vto-progress-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6c63ff, #e040fb);
+  border-radius: 2px;
+  width: 0%;
+  animation: vtoProgress 15s ease-out forwards;
+}
+
+/* Result */
+.vto-result {
+  text-align: center;
+}
+
+.vto-result__image {
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  animation: vtoFadeIn 0.5s ease-out;
+}
+
+.vto-result__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.vto-action-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 120px;
+}
+
+.vto-action-btn--primary {
+  background: #6c63ff;
+  color: #fff;
+}
+
+.vto-action-btn--primary:hover {
+  background: #5a52d5;
+  transform: translateY(-1px);
+}
+
+.vto-action-btn--secondary {
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+}
+
+.vto-modal__dialog[data-theme="dark"] .vto-action-btn--secondary {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vto-action-btn--secondary:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Error */
+.vto-error {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.vto-error__icon {
+  font-size: 48px;
+  margin: 0 0 16px;
+}
+
+.vto-error__title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.vto-error__message {
+  font-size: 14px;
+  opacity: 0.6;
+  margin: 0 0 24px;
+}
+
+/* Animations */
+@keyframes vtoFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vtoSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes vtoSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes vtoProgress {
+  0% { width: 0%; }
+  30% { width: 50%; }
+  60% { width: 75%; }
+  90% { width: 90%; }
+  100% { width: 95%; }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .vto-modal__dialog {
+    max-height: 95vh;
+    border-radius: 12px 12px 0 0;
+    align-self: flex-end;
+  }
+
+  .vto-preview-grid {
+    flex-direction: column;
+  }
+
+  .vto-preview-card__plus {
+    transform: rotate(90deg);
+  }
+
+  .vto-result__actions {
+    flex-direction: column;
+  }
+
+  .vto-action-btn {
+    min-width: 100%;
+  }
+}

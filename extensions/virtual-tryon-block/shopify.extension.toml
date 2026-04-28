@@ -1,0 +1,11 @@
+api_version = "2025-07"
+uid = "8cbf45ac-3a90-a124-7b92-bd023bc2596dde224eef"
+
+[[extensions]]
+type = "theme"
+name = "Virtual Try-On Button"
+handle = "virtual-tryon-block"
+
+  [[extensions.targeting]]
+  module = "./blocks/tryon-button.liquid"
+  target = "section"

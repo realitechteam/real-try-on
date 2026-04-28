@@ -1,0 +1,221 @@
+{% comment %}
+  Virtual Try-On Button - Shopify Theme App Extension
+  Renders a try-on button on product pages with full modal experience.
+{% endcomment %}
+
+<div id="vto-container-{{ block.id }}" class="vto-container" {{ block.shopify_attributes }}>
+  <button
+    id="vto-trigger-{{ block.id }}"
+    class="vto-button"
+    type="button"
+    style="
+      background-color: {{ block.settings.button_color }};
+      color: {{ block.settings.button_text_color }};
+      border-radius: {{ block.settings.button_radius }}px;
+      font-size: {{ block.settings.font_size }}px;
+      width: {{ block.settings.full_width | default: false | ternary: '100%', 'auto' }};
+    "
+    data-shop="{{ shop.permanent_domain }}"
+    data-product-id="{{ product.id }}"
+    data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+    data-product-title="{{ product.title | escape }}"
+    data-garment-image="{{ product.selected_or_first_available_variant.featured_image.src | default: product.featured_image.src | image_url: width: 1024 }}"
+    data-app-url="{{ block.settings.app_url }}"
+  >
+    <span class="vto-button__icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a2 2 0 0 0-1.34 1.88v14.12a1 1 0 0 0 1 1h17.44a1 1 0 0 0 1-1V5.34a2 2 0 0 0-1.34-1.88z"/>
+        <path d="M12 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+        <path d="M12 14c-4 0-6 2-6 4"/>
+        <path d="M18 18c0-2-2-4-6-4"/>
+      </svg>
+    </span>
+    <span class="vto-button__label">{{ block.settings.button_label }}</span>
+  </button>
+</div>
+
+<!-- Virtual Try-On Modal -->
+<div id="vto-modal-{{ block.id }}" class="vto-modal" style="display: none;">
+  <div class="vto-modal__backdrop"></div>
+  <div class="vto-modal__dialog" data-theme="{{ block.settings.modal_theme }}">
+    <div class="vto-modal__header">
+      <h2 class="vto-modal__title">Virtual Try-On</h2>
+      <button class="vto-modal__close" type="button" aria-label="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="vto-modal__body">
+      <!-- Step 1: Upload -->
+      <div class="vto-step" data-step="upload">
+        <div class="vto-upload-area" id="vto-dropzone-{{ block.id }}">
+          <div class="vto-upload-area__icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <p class="vto-upload-area__title">Upload your photo</p>
+          <p class="vto-upload-area__subtitle">Take or upload a full-body photo for the best results</p>
+          <input type="file" id="vto-file-{{ block.id }}" accept="image/jpeg,image/png,image/webp" style="display:none">
+          <button type="button" class="vto-upload-btn" onclick="document.getElementById('vto-file-{{ block.id }}').click()">
+            Choose Photo
+          </button>
+          <p class="vto-upload-area__hint">JPEG, PNG or WebP · Max 10MB</p>
+        </div>
+        <div class="vto-consent">
+          <label>
+            <input type="checkbox" id="vto-consent-{{ block.id }}">
+            <span>I agree to have my photo processed by AI for this virtual try-on. <a href="{{ block.settings.privacy_url }}" target="_blank">Privacy Policy</a></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Step 2: Preview & Generate -->
+      <div class="vto-step" data-step="preview" style="display:none">
+        <div class="vto-preview-grid">
+          <div class="vto-preview-card">
+            <p class="vto-preview-card__label">Your Photo</p>
+            <img id="vto-person-preview-{{ block.id }}" src="" alt="Your photo">
+          </div>
+          <div class="vto-preview-card__plus">+</div>
+          <div class="vto-preview-card">
+            <p class="vto-preview-card__label">{{ product.title }}</p>
+            <img id="vto-garment-preview-{{ block.id }}" src="" alt="Garment">
+          </div>
+        </div>
+        <button type="button" class="vto-generate-btn" id="vto-generate-{{ block.id }}">
+          ✨ Generate Try-On
+        </button>
+      </div>
+
+      <!-- Step 3: Processing -->
+      <div class="vto-step" data-step="processing" style="display:none">
+        <div class="vto-processing">
+          <div class="vto-spinner"></div>
+          <p class="vto-processing__title">Creating your look...</p>
+          <p class="vto-processing__subtitle">This usually takes 5-15 seconds</p>
+          <div class="vto-progress-bar">
+            <div class="vto-progress-bar__fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Result -->
+      <div class="vto-step" data-step="result" style="display:none">
+        <div class="vto-result">
+          <img id="vto-result-image-{{ block.id }}" src="" alt="Virtual try-on result" class="vto-result__image">
+          <div class="vto-result__actions">
+            <button type="button" class="vto-action-btn vto-action-btn--primary" id="vto-add-to-cart-{{ block.id }}">
+              🛒 Add to Cart
+            </button>
+            <button type="button" class="vto-action-btn vto-action-btn--secondary" id="vto-retry-{{ block.id }}">
+              🔄 Try Another Photo
+            </button>
+            <button type="button" class="vto-action-btn vto-action-btn--secondary" id="vto-download-{{ block.id }}">
+              💾 Save Image
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div class="vto-step" data-step="error" style="display:none">
+        <div class="vto-error">
+          <p class="vto-error__icon">😕</p>
+          <p class="vto-error__title">Something went wrong</p>
+          <p class="vto-error__message" id="vto-error-msg-{{ block.id }}"></p>
+          <button type="button" class="vto-action-btn vto-action-btn--primary" id="vto-error-retry-{{ block.id }}">
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="vto-modal__footer">
+      <p>Powered by Virtual Try-On · <a href="{{ block.settings.privacy_url }}" target="_blank">Privacy</a></p>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Virtual Try-On",
+  "target": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "javascript": "tryon-widget.js",
+  "stylesheet": "tryon-widget.css",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "Try It On"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button Color",
+      "default": "#1a1a2e"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Button Border Radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "default": 8,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 14,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full Width Button",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "modal_theme",
+      "label": "Modal Theme",
+      "options": [
+        { "value": "light", "label": "Light" },
+        { "value": "dark", "label": "Dark" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "url",
+      "id": "app_url",
+      "label": "App URL",
+      "info": "Your Virtual Try-On app URL (found in app settings)"
+    },
+    {
+      "type": "url",
+      "id": "privacy_url",
+      "label": "Privacy Policy URL",
+      "info": "Link to your privacy policy page"
+    }
+  ]
+}
+{% endschema %}
