@@ -1,6 +1,6 @@
 {% comment %}
   Virtual Try-On Button - Shopify Theme App Extension
-  Renders a try-on button on product pages with full modal experience.
+  Premium widget with camera capture + photo upload for AI virtual try-on.
 {% endcomment %}
 
 <div id="vto-container-{{ block.id }}" class="vto-container" {{ block.shopify_attributes }}>
@@ -31,6 +31,7 @@
       </svg>
     </span>
     <span class="vto-button__label">{{ block.settings.button_label }}</span>
+    <span class="vto-button__shimmer"></span>
   </button>
 </div>
 
@@ -39,38 +40,103 @@
   <div class="vto-modal__backdrop"></div>
   <div class="vto-modal__dialog" data-theme="{{ block.settings.modal_theme }}">
     <div class="vto-modal__header">
-      <h2 class="vto-modal__title">Virtual Try-On</h2>
+      <div class="vto-modal__header-left">
+        <div class="vto-modal__logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a2 2 0 0 0-1.34 1.88v14.12a1 1 0 0 0 1 1h17.44a1 1 0 0 0 1-1V5.34a2 2 0 0 0-1.34-1.88z"/>
+            <path d="M12 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          </svg>
+        </div>
+        <h2 class="vto-modal__title">Virtual Try-On</h2>
+      </div>
       <button class="vto-modal__close" type="button" aria-label="Close">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
     </div>
+
     <div class="vto-modal__body">
-      <!-- Step 1: Upload -->
+
+      <!-- Step 1: Choose method (Upload or Camera) -->
       <div class="vto-step" data-step="upload">
-        <div class="vto-upload-area" id="vto-dropzone-{{ block.id }}">
-          <div class="vto-upload-area__icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <circle cx="8.5" cy="8.5" r="1.5"></circle>
-              <polyline points="21 15 16 10 5 21"></polyline>
-            </svg>
+        <div class="vto-method-chooser">
+          <p class="vto-method-chooser__heading">Get your photo</p>
+          <p class="vto-method-chooser__sub">Upload a full-body photo or take one with your camera</p>
+
+          <div class="vto-method-grid">
+            <!-- Upload option -->
+            <div class="vto-method-card" id="vto-method-upload-{{ block.id }}">
+              <div class="vto-method-card__icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <p class="vto-method-card__title">Upload Photo</p>
+              <p class="vto-method-card__desc">From your gallery or files</p>
+              <input type="file" id="vto-file-{{ block.id }}" accept="image/jpeg,image/png,image/webp" capture="user" style="display:none">
+            </div>
+
+            <!-- Camera option -->
+            <div class="vto-method-card" id="vto-method-camera-{{ block.id }}">
+              <div class="vto-method-card__icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </div>
+              <p class="vto-method-card__title">Take Photo</p>
+              <p class="vto-method-card__desc">Use your camera now</p>
+            </div>
           </div>
-          <p class="vto-upload-area__title">Upload your photo</p>
-          <p class="vto-upload-area__subtitle">Take or upload a full-body photo for the best results</p>
-          <input type="file" id="vto-file-{{ block.id }}" accept="image/jpeg,image/png,image/webp" style="display:none">
-          <button type="button" class="vto-upload-btn" onclick="document.getElementById('vto-file-{{ block.id }}').click()">
-            Choose Photo
-          </button>
-          <p class="vto-upload-area__hint">JPEG, PNG or WebP · Max 10MB</p>
+
+          <div class="vto-upload-area" id="vto-dropzone-{{ block.id }}">
+            <p class="vto-upload-area__hint">or drag & drop your photo here</p>
+          </div>
         </div>
+
+        <div class="vto-tips">
+          <p class="vto-tips__title">📸 Tips for best results</p>
+          <ul class="vto-tips__list">
+            <li>Stand facing the camera in a well-lit area</li>
+            <li>Show your full body from head to toe</li>
+            <li>Wear form-fitting clothing for accuracy</li>
+          </ul>
+        </div>
+
         <div class="vto-consent">
           <label>
             <input type="checkbox" id="vto-consent-{{ block.id }}">
-            <span>I agree to have my photo processed by AI for this virtual try-on. <a href="{{ block.settings.privacy_url }}" target="_blank">Privacy Policy</a></span>
+            <span>I agree to have my photo processed by AI. <a href="{{ block.settings.privacy_url }}" target="_blank">Privacy Policy</a></span>
           </label>
+        </div>
+      </div>
+
+      <!-- Step: Camera capture -->
+      <div class="vto-step" data-step="camera" style="display:none">
+        <div class="vto-camera">
+          <div class="vto-camera__viewfinder">
+            <video id="vto-camera-video-{{ block.id }}" autoplay playsinline muted></video>
+            <canvas id="vto-camera-canvas-{{ block.id }}" style="display:none"></canvas>
+            <div class="vto-camera__guide">
+              <div class="vto-camera__guide-border"></div>
+              <p class="vto-camera__guide-text">Position yourself in the frame</p>
+            </div>
+          </div>
+          <div class="vto-camera__controls">
+            <button type="button" class="vto-camera__btn-back" id="vto-camera-back-{{ block.id }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>
+            </button>
+            <button type="button" class="vto-camera__btn-capture" id="vto-camera-capture-{{ block.id }}">
+              <span class="vto-camera__btn-capture-inner"></span>
+            </button>
+            <button type="button" class="vto-camera__btn-flip" id="vto-camera-flip-{{ block.id }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -79,44 +145,64 @@
         <div class="vto-preview-grid">
           <div class="vto-preview-card">
             <p class="vto-preview-card__label">Your Photo</p>
-            <img id="vto-person-preview-{{ block.id }}" src="" alt="Your photo">
+            <div class="vto-preview-card__img-wrap">
+              <img id="vto-person-preview-{{ block.id }}" src="" alt="Your photo">
+            </div>
           </div>
-          <div class="vto-preview-card__plus">+</div>
+          <div class="vto-preview-card__merge">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+          </div>
           <div class="vto-preview-card">
             <p class="vto-preview-card__label">{{ product.title }}</p>
-            <img id="vto-garment-preview-{{ block.id }}" src="" alt="Garment">
+            <div class="vto-preview-card__img-wrap">
+              <img id="vto-garment-preview-{{ block.id }}" src="" alt="Garment">
+            </div>
           </div>
         </div>
         <button type="button" class="vto-generate-btn" id="vto-generate-{{ block.id }}">
-          ✨ Generate Try-On
+          <span class="vto-generate-btn__icon">✨</span>
+          <span>Generate Try-On</span>
+        </button>
+        <button type="button" class="vto-change-photo-btn" id="vto-change-photo-{{ block.id }}">
+          Change photo
         </button>
       </div>
 
       <!-- Step 3: Processing -->
       <div class="vto-step" data-step="processing" style="display:none">
         <div class="vto-processing">
-          <div class="vto-spinner"></div>
+          <div class="vto-processing__anim">
+            <div class="vto-orb vto-orb--1"></div>
+            <div class="vto-orb vto-orb--2"></div>
+            <div class="vto-orb vto-orb--3"></div>
+          </div>
           <p class="vto-processing__title">Creating your look...</p>
-          <p class="vto-processing__subtitle">This usually takes 5-15 seconds</p>
+          <p class="vto-processing__subtitle">Our AI is trying the outfit on your photo</p>
           <div class="vto-progress-bar">
             <div class="vto-progress-bar__fill"></div>
           </div>
+          <p class="vto-processing__time">Usually takes 10-20 seconds</p>
         </div>
       </div>
 
       <!-- Step 4: Result -->
       <div class="vto-step" data-step="result" style="display:none">
         <div class="vto-result">
-          <img id="vto-result-image-{{ block.id }}" src="" alt="Virtual try-on result" class="vto-result__image">
+          <div class="vto-result__img-wrap">
+            <img id="vto-result-image-{{ block.id }}" src="" alt="Virtual try-on result" class="vto-result__image">
+          </div>
           <div class="vto-result__actions">
             <button type="button" class="vto-action-btn vto-action-btn--primary" id="vto-add-to-cart-{{ block.id }}">
-              🛒 Add to Cart
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <span>Add to Cart</span>
             </button>
             <button type="button" class="vto-action-btn vto-action-btn--secondary" id="vto-retry-{{ block.id }}">
-              🔄 Try Another Photo
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+              <span>Try Again</span>
             </button>
             <button type="button" class="vto-action-btn vto-action-btn--secondary" id="vto-download-{{ block.id }}">
-              💾 Save Image
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Save</span>
             </button>
           </div>
         </div>
@@ -125,7 +211,13 @@
       <!-- Error state -->
       <div class="vto-step" data-step="error" style="display:none">
         <div class="vto-error">
-          <p class="vto-error__icon">😕</p>
+          <div class="vto-error__icon-wrap">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+          </div>
           <p class="vto-error__title">Something went wrong</p>
           <p class="vto-error__message" id="vto-error-msg-{{ block.id }}"></p>
           <button type="button" class="vto-action-btn vto-action-btn--primary" id="vto-error-retry-{{ block.id }}">
@@ -134,8 +226,9 @@
         </div>
       </div>
     </div>
+
     <div class="vto-modal__footer">
-      <p>Powered by Virtual Try-On · <a href="{{ block.settings.privacy_url }}" target="_blank">Privacy</a></p>
+      <p>Powered by <strong>REAL TRY ON</strong> · <a href="{{ block.settings.privacy_url }}" target="_blank">Privacy</a></p>
     </div>
   </div>
 </div>
