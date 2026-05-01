@@ -62,105 +62,118 @@ export default function DashboardPage() {
         </s-banner>
       )}
 
-      <s-layout>
-        <s-layout-column>
-          {/* Status cards */}
+      {/* Status cards */}
+      <s-section>
+        <s-grid gap="base" gridTemplateColumns="repeat(3, minmax(0, 1fr))">
           <s-section>
-            <s-columns columns="3" gap="base">
-              <s-card>
-                <s-stack direction="block" gap="tight">
-                  <s-text variant="headingSm">Status</s-text>
-                  <s-badge tone={shop.isEnabled ? "success" : "critical"}>
-                    {shop.isEnabled ? "Active" : "Disabled"}
+            <s-stack direction="block" gap="small">
+              <s-heading>Status</s-heading>
+              <s-badge tone={shop.isEnabled ? "success" : "critical"}>
+                {shop.isEnabled ? "Active" : "Disabled"}
+              </s-badge>
+              <s-text color="subdued">
+                Plan: <strong>{shop.plan.charAt(0).toUpperCase() + shop.plan.slice(1)}</strong>
+              </s-text>
+            </s-stack>
+          </s-section>
+
+          <s-section>
+            <s-stack direction="block" gap="small">
+              <s-heading>Quota Usage</s-heading>
+              <s-text>
+                {shop.usedQuota} / {shop.monthlyQuota} ({shop.quotaPct}%)
+              </s-text>
+              <div
+                style={{
+                  height: "8px",
+                  width: "100%",
+                  background: "#e1e3e5",
+                  borderRadius: "4px",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${Math.min(shop.quotaPct, 100)}%`,
+                    background: shop.quotaPct > 80 ? "#d72c0d" : "#008060",
+                  }}
+                />
+              </div>
+            </s-stack>
+          </s-section>
+
+          <s-section>
+            <s-stack direction="block" gap="small">
+              <s-heading>Last 30 Days</s-heading>
+              <s-heading>{String(stats.last30)}</s-heading>
+              <s-text color="subdued">try-on generations</s-text>
+            </s-stack>
+          </s-section>
+        </s-grid>
+      </s-section>
+
+      {/* Performance overview */}
+      <s-section heading="Performance Overview">
+        <s-grid gap="base" gridTemplateColumns="repeat(4, minmax(0, 1fr))">
+          <s-stack direction="block" gap="small-100">
+            <s-text color="subdued">Total Generations</s-text>
+            <s-heading>{String(stats.totalGens)}</s-heading>
+          </s-stack>
+          <s-stack direction="block" gap="small-100">
+            <s-text color="subdued">This Week</s-text>
+            <s-heading>{String(stats.last7)}</s-heading>
+          </s-stack>
+          <s-stack direction="block" gap="small-100">
+            <s-text color="subdued">Widget Opens (30d)</s-text>
+            <s-heading>{String(stats.widgetOpens)}</s-heading>
+          </s-stack>
+          <s-stack direction="block" gap="small-100">
+            <s-text color="subdued">Failed</s-text>
+            <s-heading>{String(stats.failedCount)}</s-heading>
+          </s-stack>
+        </s-grid>
+      </s-section>
+
+      {/* Recent generations */}
+      <s-section heading="Recent Generations">
+        {recentGens.length === 0 ? (
+          <s-box padding="large-100">
+            <s-text color="subdued">
+              No generations yet. Once customers start using Virtual Try-On, you'll see results here.
+            </s-text>
+          </s-box>
+        ) : (
+          <s-stack direction="block" gap="small">
+            {recentGens.map((gen: any) => (
+              <s-box
+                key={gen.id}
+                padding="base"
+                border="base"
+                borderRadius="base"
+              >
+                <s-stack direction="inline" gap="base" alignItems="center">
+                  <s-stack direction="block" gap="small-100">
+                    <s-heading>{gen.productTitle}</s-heading>
+                    <s-text color="subdued">
+                      {new Date(gen.createdAt).toLocaleString()}
+                    </s-text>
+                  </s-stack>
+                  <s-badge
+                    tone={
+                      gen.status === "completed" ? "success" :
+                      gen.status === "failed" ? "critical" :
+                      gen.status === "processing" ? "warning" : "info"
+                    }
+                  >
+                    {gen.status}
                   </s-badge>
-                  <s-text tone="subdued">
-                    Plan: <strong>{shop.plan.charAt(0).toUpperCase() + shop.plan.slice(1)}</strong>
-                  </s-text>
                 </s-stack>
-              </s-card>
-
-              <s-card>
-                <s-stack direction="block" gap="tight">
-                  <s-text variant="headingSm">Quota Usage</s-text>
-                  <s-text>
-                    {shop.usedQuota} / {shop.monthlyQuota} ({shop.quotaPct}%)
-                  </s-text>
-                  <s-progress-bar
-                    value={shop.quotaPct}
-                    tone={shop.quotaPct > 80 ? "critical" : undefined}
-                    size="small"
-                  />
-                </s-stack>
-              </s-card>
-
-              <s-card>
-                <s-stack direction="block" gap="tight">
-                  <s-text variant="headingSm">Last 30 Days</s-text>
-                  <s-text variant="headingLg">{stats.last30}</s-text>
-                  <s-text tone="subdued">try-on generations</s-text>
-                </s-stack>
-              </s-card>
-            </s-columns>
-          </s-section>
-
-          {/* Performance overview */}
-          <s-section heading="Performance Overview">
-            <s-columns columns="4" gap="base">
-              <s-stack direction="block" gap="extraTight">
-                <s-text tone="subdued">Total Generations</s-text>
-                <s-text variant="headingLg">{stats.totalGens}</s-text>
-              </s-stack>
-              <s-stack direction="block" gap="extraTight">
-                <s-text tone="subdued">This Week</s-text>
-                <s-text variant="headingLg">{stats.last7}</s-text>
-              </s-stack>
-              <s-stack direction="block" gap="extraTight">
-                <s-text tone="subdued">Widget Opens (30d)</s-text>
-                <s-text variant="headingLg">{stats.widgetOpens}</s-text>
-              </s-stack>
-              <s-stack direction="block" gap="extraTight">
-                <s-text tone="subdued">Failed</s-text>
-                <s-text variant="headingLg" tone="critical">{stats.failedCount}</s-text>
-              </s-stack>
-            </s-columns>
-          </s-section>
-
-          {/* Recent generations */}
-          <s-section heading="Recent Generations">
-            {recentGens.length === 0 ? (
-              <s-box padding="extraLarge">
-                <s-text tone="subdued" alignment="center">
-                  No generations yet. Once customers start using Virtual Try-On, you'll see results here.
-                </s-text>
               </s-box>
-            ) : (
-              <s-resource-list>
-                {recentGens.map((gen: any) => (
-                  <s-resource-item key={gen.id}>
-                    <s-stack direction="inline" gap="base" blockAlign="center">
-                      <s-stack direction="block" gap="extraTight">
-                        <s-text fontWeight="semibold">{gen.productTitle}</s-text>
-                        <s-text tone="subdued" variant="bodySm">
-                          {new Date(gen.createdAt).toLocaleString()}
-                        </s-text>
-                      </s-stack>
-                      <s-badge
-                        tone={
-                          gen.status === "completed" ? "success" :
-                          gen.status === "failed" ? "critical" :
-                          gen.status === "processing" ? "attention" : "info"
-                        }
-                      >
-                        {gen.status}
-                      </s-badge>
-                    </s-stack>
-                  </s-resource-item>
-                ))}
-              </s-resource-list>
-            )}
-          </s-section>
-        </s-layout-column>
-      </s-layout>
+            ))}
+          </s-stack>
+        )}
+      </s-section>
     </s-page>
   );
 }

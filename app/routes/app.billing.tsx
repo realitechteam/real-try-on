@@ -1,38 +1,108 @@
 import type { ActionFunctionArgs, HeadersFunction, LoaderFunctionArgs } from "react-router";
 import { useLoaderData, useSubmit } from "react-router";
-import { authenticate } from "../shopify.server";
+import { authenticate, PLANS, PLAN_STARTER, PLAN_GROWTH, PLAN_PRO } from "../shopify.server";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import db from "../db.server";
 
-const PLANS = [
-  { id: "free", name: "Free", price: 0, quota: 50, features: ["50 generations/month", "Basic widget", "Standard support"], overage: null },
-  { id: "starter", name: "Starter", price: 19, quota: 500, features: ["500 generations/month", "Full customization", "Analytics", "Email support", "$0.10/extra"], overage: 0.10 },
-  { id: "growth", name: "Growth", price: 49, quota: 2000, features: ["2,000 generations/month", "Full customization", "Advanced analytics", "Priority support", "$0.07/extra"], overage: 0.07 },
-  { id: "pro", name: "Pro", price: 99, quota: 5000, features: ["5,000 generations/month", "Full customization", "Attribution analytics", "Dedicated support", "$0.05/extra", "Custom branding"], overage: 0.05 },
+const FREE_PLAN = "Free";
+
+const PLAN_CARDS = [
+  {
+    id: FREE_PLAN,
+    name: "Free",
+    price: 0,
+    quota: 50,
+    features: ["50 generations/month", "Basic widget", "Standard support"],
+  },
+  {
+    id: PLAN_STARTER,
+    name: "Starter",
+    price: PLANS[PLAN_STARTER].amount,
+    quota: PLANS[PLAN_STARTER].quota,
+    features: ["500 generations/month", "Full customization", "Analytics", "Email support"],
+  },
+  {
+    id: PLAN_GROWTH,
+    name: "Growth",
+    price: PLANS[PLAN_GROWTH].amount,
+    quota: PLANS[PLAN_GROWTH].quota,
+    features: ["2,000 generations/month", "Full customization", "Advanced analytics", "Priority support"],
+  },
+  {
+    id: PLAN_PRO,
+    name: "Pro",
+    price: PLANS[PLAN_PRO].amount,
+    quota: PLANS[PLAN_PRO].quota,
+    features: ["5,000 generations/month", "Full customization", "Attribution analytics", "Dedicated support"],
+  },
 ];
 
+// SDK types `plans` as `(keyof Config['billing'])[]`, but the generic doesn't flow
+// through the shopifyApp() factory in v1.1, so it collapses to `never[]`. Runtime
+// values match the configured handles, so cast at the call sites.
+const PAID_PLANS = [PLAN_STARTER, PLAN_GROWTH, PLAN_PRO];
+const isTest = process.env.SHOPIFY_BILLING_TEST !== "false";
+
+function quotaForPlan(planId: string): number {
+  return PLAN_CARDS.find((p) => p.id === planId)?.quota ?? 50;
+}
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const { session, billing } = await authenticate.admin(request);
+  const check = await billing.check({ plans: PAID_PLANS as never[], isTest });
+  const activePlan = check.hasActivePayment ? check.appSubscriptions[0]?.name ?? FREE_PLAN : FREE_PLAN;
+
+  // Reconcile quota with the active plan from Shopify.
+  const expectedQuota = quotaForPlan(activePlan);
   const shop = await db.shop.findUnique({ where: { shopDomain: session.shop } });
+  if (shop && (shop.plan !== activePlan || shop.monthlyQuota !== expectedQuota)) {
+    await db.shop.update({
+      where: { shopDomain: session.shop },
+      data: { plan: activePlan, monthlyQuota: expectedQuota },
+    });
+  }
+
   return {
-    currentPlan: shop?.plan || "free",
-    usedQuota: shop?.usedQuota || 0,
-    monthlyQuota: shop?.monthlyQuota || 50,
-    plans: PLANS,
+    currentPlan: activePlan,
+    usedQuota: shop?.usedQuota ?? 0,
+    monthlyQuota: expectedQuota,
+    plans: PLAN_CARDS,
   };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const { session, billing } = await authenticate.admin(request);
   const fd = await request.formData();
   const planId = fd.get("planId") as string;
-  const plan = PLANS.find((p) => p.id === planId);
-  if (!plan) return { error: "Invalid plan" };
 
-  await db.shop.update({
-    where: { shopDomain: session.shop },
-    data: { plan: plan.id, monthlyQuota: plan.quota },
+  if (planId === FREE_PLAN) {
+    // Cancel any active subscriptions and downgrade locally.
+    const check = await billing.check({ plans: PAID_PLANS as never[], isTest });
+    for (const sub of check.appSubscriptions) {
+      await billing.cancel({ subscriptionId: sub.id, isTest, prorate: true });
+    }
+    await db.shop.update({
+      where: { shopDomain: session.shop },
+      data: { plan: FREE_PLAN, monthlyQuota: 50 },
+    });
+    return { success: true };
+  }
+
+  if (!PAID_PLANS.includes(planId)) {
+    return { error: "Invalid plan" };
+  }
+
+  await billing.require({
+    plans: [planId] as never[],
+    isTest,
+    onFailure: async () =>
+      billing.request({
+        plan: planId as never,
+        isTest,
+        returnUrl: `${process.env.SHOPIFY_APP_URL}/app/billing`,
+      }),
   });
+
   return { success: true };
 };
 
@@ -48,46 +118,41 @@ export default function BillingPage() {
 
   return (
     <s-page heading="Plans & Billing">
-      <s-layout>
-        <s-layout-column>
-          <s-banner tone="info">
-            Current plan: <strong>{currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}</strong> — {usedQuota} of {monthlyQuota} generations used this month.
-          </s-banner>
+      <s-banner tone="info">
+        Current plan: <strong>{currentPlan}</strong> — {usedQuota} of {monthlyQuota} generations used this month.
+      </s-banner>
 
-          <s-section>
-            <s-columns columns="4" gap="base">
-              {plans.map((plan) => (
-                <s-card key={plan.id}>
-                  <s-stack direction="block" gap="base">
-                    <s-stack direction="inline" gap="tight" blockAlign="center">
-                      <s-text variant="headingMd">{plan.name}</s-text>
-                      {currentPlan === plan.id && <s-badge tone="success">Current</s-badge>}
-                    </s-stack>
-                    <s-text variant="headingXl">
-                      {plan.price === 0 ? "Free" : `$${plan.price}`}
-                    </s-text>
-                    {plan.price > 0 && <s-text tone="subdued">/month</s-text>}
-                    <s-divider />
-                    <s-unordered-list>
-                      {plan.features.map((f, i) => (
-                        <s-list-item key={i}>{f}</s-list-item>
-                      ))}
-                    </s-unordered-list>
-                    <s-button
-                      variant={currentPlan === plan.id ? "secondary" : "primary"}
-                      disabled={currentPlan === plan.id}
-                      onClick={() => selectPlan(plan.id)}
-                      fullWidth
-                    >
-                      {currentPlan === plan.id ? "Current Plan" : plan.price === 0 ? "Downgrade" : "Upgrade"}
-                    </s-button>
-                  </s-stack>
-                </s-card>
-              ))}
-            </s-columns>
-          </s-section>
-        </s-layout-column>
-      </s-layout>
+      <s-section>
+        <s-grid gap="base" gridTemplateColumns="repeat(4, minmax(0, 1fr))">
+          {plans.map((plan) => (
+            <s-section key={plan.id}>
+              <s-stack direction="block" gap="base">
+                <s-stack direction="inline" gap="small" alignItems="center">
+                  <s-heading>{plan.name}</s-heading>
+                  {currentPlan === plan.id && <s-badge tone="success">Current</s-badge>}
+                </s-stack>
+                <s-heading>
+                  {plan.price === 0 ? "Free" : `$${plan.price}`}
+                </s-heading>
+                {plan.price > 0 && <s-text color="subdued">/month</s-text>}
+                <s-divider />
+                <s-unordered-list>
+                  {plan.features.map((f, i) => (
+                    <s-list-item key={i}>{f}</s-list-item>
+                  ))}
+                </s-unordered-list>
+                <s-button
+                  variant={currentPlan === plan.id ? "secondary" : "primary"}
+                  disabled={currentPlan === plan.id}
+                  onClick={() => selectPlan(plan.id)}
+                >
+                  {currentPlan === plan.id ? "Current Plan" : plan.price === 0 ? "Downgrade" : "Upgrade"}
+                </s-button>
+              </s-stack>
+            </s-section>
+          ))}
+        </s-grid>
+      </s-section>
     </s-page>
   );
 }

@@ -57,89 +57,83 @@ export default function AnalyticsPage() {
   const { stats, funnel, topProducts } = useLoaderData<typeof loader>();
 
   return (
-    <s-page heading="Analytics" subtitle="Last 30 days performance">
-      <s-layout>
-        <s-layout-column>
+    <s-page heading="Analytics">
+      <s-text color="subdued">Last 30 days performance</s-text>
+
+      <s-section>
+        <s-grid gap="base" gridTemplateColumns="repeat(4, minmax(0, 1fr))">
           <s-section>
-            <s-columns columns="4" gap="base">
-              <s-card>
-                <s-stack direction="block" gap="extraTight">
-                  <s-text tone="subdued">Total Generations</s-text>
-                  <s-text variant="headingLg">{stats?.totalGens ?? 0}</s-text>
-                </s-stack>
-              </s-card>
-              <s-card>
-                <s-stack direction="block" gap="extraTight">
-                  <s-text tone="subdued">Completed</s-text>
-                  <s-text variant="headingLg">{stats?.completedGens ?? 0}</s-text>
-                </s-stack>
-              </s-card>
-              <s-card>
-                <s-stack direction="block" gap="extraTight">
-                  <s-text tone="subdued">Success Rate</s-text>
-                  <s-text variant="headingLg">{stats?.successRate ?? 0}%</s-text>
-                </s-stack>
-              </s-card>
-              <s-card>
-                <s-stack direction="block" gap="extraTight">
-                  <s-text tone="subdued">Avg Time</s-text>
-                  <s-text variant="headingLg">{stats?.avgTime ?? 0}s</s-text>
-                </s-stack>
-              </s-card>
-            </s-columns>
+            <s-stack direction="block" gap="small-100">
+              <s-text color="subdued">Total Generations</s-text>
+              <s-heading>{String(stats?.totalGens ?? 0)}</s-heading>
+            </s-stack>
           </s-section>
+          <s-section>
+            <s-stack direction="block" gap="small-100">
+              <s-text color="subdued">Completed</s-text>
+              <s-heading>{String(stats?.completedGens ?? 0)}</s-heading>
+            </s-stack>
+          </s-section>
+          <s-section>
+            <s-stack direction="block" gap="small-100">
+              <s-text color="subdued">Success Rate</s-text>
+              <s-heading>{`${stats?.successRate ?? 0}%`}</s-heading>
+            </s-stack>
+          </s-section>
+          <s-section>
+            <s-stack direction="block" gap="small-100">
+              <s-text color="subdued">Avg Time</s-text>
+              <s-heading>{`${stats?.avgTime ?? 0}s`}</s-heading>
+            </s-stack>
+          </s-section>
+        </s-grid>
+      </s-section>
 
-          <s-section heading="Try-On Funnel">
-            <s-card>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ borderBottom: "1px solid #e1e3e5" }}>
-                    <th style={{ padding: "8px 12px", textAlign: "left", fontSize: "13px", color: "#6d7175" }}>Step</th>
-                    <th style={{ padding: "8px 12px", textAlign: "right", fontSize: "13px", color: "#6d7175" }}>Count</th>
-                    <th style={{ padding: "8px 12px", textAlign: "right", fontSize: "13px", color: "#6d7175" }}>Conv. Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {funnel.map((f: any, i: number) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #f1f2f3" }}>
-                      <td style={{ padding: "8px 12px", fontSize: "14px" }}>{f.step}</td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "14px" }}>{f.count}</td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "14px" }}>{f.rate}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </s-card>
-          </s-section>
+      <s-section heading="Try-On Funnel">
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid #e1e3e5" }}>
+              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: "13px", color: "#6d7175" }}>Step</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: "13px", color: "#6d7175" }}>Count</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: "13px", color: "#6d7175" }}>Conv. Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {funnel.map((f: any, i: number) => (
+              <tr key={i} style={{ borderBottom: "1px solid #f1f2f3" }}>
+                <td style={{ padding: "8px 12px", fontSize: "14px" }}>{f.step}</td>
+                <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "14px" }}>{f.count}</td>
+                <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "14px" }}>{f.rate}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </s-section>
 
-          <s-section heading="Top Products">
-            <s-card>
-              {topProducts.length === 0 ? (
-                <s-box padding="large">
-                  <s-text tone="subdued" alignment="center">No data yet</s-text>
-                </s-box>
-              ) : (
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid #e1e3e5" }}>
-                      <th style={{ padding: "8px 12px", textAlign: "left", fontSize: "13px", color: "#6d7175" }}>Product</th>
-                      <th style={{ padding: "8px 12px", textAlign: "right", fontSize: "13px", color: "#6d7175" }}>Generations</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topProducts.map((p: any, i: number) => (
-                      <tr key={i} style={{ borderBottom: "1px solid #f1f2f3" }}>
-                        <td style={{ padding: "8px 12px", fontSize: "14px" }}>{p.title}</td>
-                        <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "14px" }}>{p.count}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </s-card>
-          </s-section>
-        </s-layout-column>
-      </s-layout>
+      <s-section heading="Top Products">
+        {topProducts.length === 0 ? (
+          <s-box padding="large">
+            <s-text color="subdued">No data yet</s-text>
+          </s-box>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #e1e3e5" }}>
+                <th style={{ padding: "8px 12px", textAlign: "left", fontSize: "13px", color: "#6d7175" }}>Product</th>
+                <th style={{ padding: "8px 12px", textAlign: "right", fontSize: "13px", color: "#6d7175" }}>Generations</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topProducts.map((p: any, i: number) => (
+                <tr key={i} style={{ borderBottom: "1px solid #f1f2f3" }}>
+                  <td style={{ padding: "8px 12px", fontSize: "14px" }}>{p.title}</td>
+                  <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "14px" }}>{p.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </s-section>
     </s-page>
   );
 }
