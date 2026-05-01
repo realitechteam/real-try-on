@@ -6,6 +6,8 @@
   "use strict";
 
   var SESSION_ID = "vto_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+  var GENERATE_URL = "/apps/realtryon/tryon/generate";
+  var EVENTS_URL = "/apps/realtryon/tryon/events";
 
   // ── Initialise ──
   function init() {
@@ -22,8 +24,6 @@
     var modal = document.getElementById("vto-modal-" + blockId);
     if (!modal) return;
 
-    var appUrl = triggerBtn.dataset.appUrl || "";
-    var shop = triggerBtn.dataset.shop;
     var garmentImage = triggerBtn.dataset.garmentImage;
     var productId = triggerBtn.dataset.productId;
     var variantId = triggerBtn.dataset.variantId;
@@ -58,14 +58,14 @@
     var facingMode = "user"; // front camera by default
 
     // Track impression
-    trackEvent(appUrl, shop, "widget_impression", productId, variantId);
+    trackEvent("widget_impression", productId, variantId);
 
     // ── Open / Close modal ──
     triggerBtn.addEventListener("click", function () {
       modal.style.display = "flex";
       document.body.style.overflow = "hidden";
       showStep(modal, "upload");
-      trackEvent(appUrl, shop, "widget_open", productId, variantId);
+      trackEvent("widget_open", productId, variantId);
     });
 
     function closeModal() {
@@ -225,7 +225,7 @@
       }
 
       personFile = file;
-      trackEvent(appUrl, shop, "photo_upload", productId, variantId);
+      trackEvent("photo_upload", productId, variantId);
 
       // Show preview
       var reader = new FileReader();
@@ -267,7 +267,6 @@
 
         try {
           var formData = new FormData();
-          formData.append("shop", shop);
           formData.append("person_image", personFile);
           formData.append("garment_image_url", garmentImage);
           formData.append("product_id", productId || "");
@@ -275,7 +274,7 @@
           formData.append("product_title", productTitle || "");
           formData.append("session_id", SESSION_ID);
 
-          var response = await fetch(appUrl + "/api/tryon/generate", {
+          var response = await fetch(GENERATE_URL, {
             method: "POST",
             body: formData,
           });
@@ -304,7 +303,7 @@
     // ── Add to cart ──
     if (addToCartBtn) {
       addToCartBtn.addEventListener("click", async function () {
-        trackEvent(appUrl, shop, "add_to_cart_after_tryon", productId, variantId);
+        trackEvent("add_to_cart_after_tryon", productId, variantId);
         try {
           var res = await fetch("/cart/add.js", {
             method: "POST",
@@ -372,14 +371,12 @@
   }
 
   // ── Analytics ──
-  function trackEvent(appUrl, shop, eventType, productId, variantId) {
-    if (!appUrl) return;
+  function trackEvent(eventType, productId, variantId) {
     try {
-      fetch(appUrl + "/api/tryon/events", {
+      fetch(EVENTS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          shop: shop,
           eventType: eventType,
           productId: productId || null,
           variantId: variantId || null,

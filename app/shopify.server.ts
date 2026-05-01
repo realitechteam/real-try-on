@@ -2,10 +2,21 @@ import "@shopify/shopify-app-react-router/adapters/node";
 import {
   ApiVersion,
   AppDistribution,
+  BillingInterval,
   shopifyApp,
 } from "@shopify/shopify-app-react-router/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
+
+export const PLAN_STARTER = "Starter";
+export const PLAN_GROWTH = "Growth";
+export const PLAN_PRO = "Pro";
+
+export const PLANS: Record<string, { amount: number; quota: number }> = {
+  [PLAN_STARTER]: { amount: 19, quota: 500 },
+  [PLAN_GROWTH]: { amount: 49, quota: 2000 },
+  [PLAN_PRO]: { amount: 99, quota: 5000 },
+};
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -14,8 +25,41 @@ const shopify = shopifyApp({
   scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: new PrismaSessionStorage(prisma),
+  // shopify-app-react-router nests its own `@shopify/shopify-api` (v13) while
+  // the prisma session-storage adapter is built against root v12. Shapes are
+  // runtime-compatible; TS only sees a private-field mismatch on Session.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sessionStorage: new PrismaSessionStorage(prisma) as any,
   distribution: AppDistribution.AppStore,
+  billing: {
+    [PLAN_STARTER]: {
+      lineItems: [
+        {
+          amount: PLANS[PLAN_STARTER].amount,
+          currencyCode: "USD",
+          interval: BillingInterval.Every30Days,
+        },
+      ],
+    },
+    [PLAN_GROWTH]: {
+      lineItems: [
+        {
+          amount: PLANS[PLAN_GROWTH].amount,
+          currencyCode: "USD",
+          interval: BillingInterval.Every30Days,
+        },
+      ],
+    },
+    [PLAN_PRO]: {
+      lineItems: [
+        {
+          amount: PLANS[PLAN_PRO].amount,
+          currencyCode: "USD",
+          interval: BillingInterval.Every30Days,
+        },
+      ],
+    },
+  },
   hooks: {
     afterAuth: async ({ session }) => {
       // Ensure shop record exists for Virtual Try-On

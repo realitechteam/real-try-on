@@ -15,12 +15,10 @@
       font-size: {{ block.settings.font_size }}px;
       width: {{ block.settings.full_width | default: false | ternary: '100%', 'auto' }};
     "
-    data-shop="{{ shop.permanent_domain }}"
     data-product-id="{{ product.id }}"
     data-variant-id="{{ product.selected_or_first_available_variant.id }}"
     data-product-title="{{ product.title | escape }}"
     data-garment-image="{{ product.selected_or_first_available_variant.featured_image.src | default: product.featured_image.src | image_url: width: 1024 }}"
-    data-app-url="{{ block.settings.app_url }}"
   >
     <span class="vto-button__icon">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -296,12 +294,6 @@
         { "value": "dark", "label": "Dark" }
       ],
       "default": "light"
-    },
-    {
-      "type": "url",
-      "id": "app_url",
-      "label": "App URL",
-      "info": "Your Virtual Try-On app URL (found in app settings)"
     },
     {
       "type": "url",
