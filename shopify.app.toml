@@ -2,7 +2,7 @@
 
 client_id = "1d705664c870d5941024cca8d5aa537a"
 name = "REAL TRY ON"
-application_url = "https://example.com"
+application_url = "https://real-try-on-app-production.up.railway.app"
 embedded = true
 
 [access_scopes]
@@ -57,12 +57,16 @@ api_version = "2026-07"
   topics = [ "shop/redact" ]
 
 [app_proxy]
-url = "https://example.com/proxy"
+url = "https://real-try-on-app-production.up.railway.app/proxy"
 subpath = "realtryon"
 prefix = "apps"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [
+  "https://real-try-on-app-production.up.railway.app/auth/callback",
+  "https://real-try-on-app-production.up.railway.app/auth/shopify/callback",
+  "https://real-try-on-app-production.up.railway.app/api/auth/callback",
+]
 
 [build]
 include_config_on_deploy = true
