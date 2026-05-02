@@ -157,7 +157,7 @@ export async function action({ request }: ActionFunctionArgs) {
       { success: false, error: result.errorMessage || "Generation failed", generationId: generation.id },
       { status: 500 },
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("[TryOn Proxy] Error:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }

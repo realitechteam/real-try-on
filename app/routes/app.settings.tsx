@@ -15,7 +15,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   const fd = await request.formData();
-  const updates: Record<string, any> = {};
+  const updates: Record<string, string | number | boolean> = {};
   for (const key of ["isEnabled","buttonLabel","buttonColor","buttonTextColor","buttonRadius","buttonPosition","modalTheme","productRule","enabledTags"]) {
     if (fd.has(key)) {
       const v = fd.get(key) as string;
@@ -86,18 +86,18 @@ export default function SettingsPage() {
           <s-text-field
             label="Button Label"
             value={buttonLabel}
-            onChange={(e: any) => setButtonLabel(e.target.value)}
+            onChange={(e) => setButtonLabel((e.target as HTMLInputElement).value)}
           />
           <s-stack direction="inline" gap="base">
             <s-text-field
               label="Button Color"
               value={buttonColor}
-              onChange={(e: any) => setButtonColor(e.target.value)}
+              onChange={(e) => setButtonColor((e.target as HTMLInputElement).value)}
             />
             <s-text-field
               label="Text Color"
               value={buttonTextColor}
-              onChange={(e: any) => setButtonTextColor(e.target.value)}
+              onChange={(e) => setButtonTextColor((e.target as HTMLInputElement).value)}
             />
           </s-stack>
           <s-number-field
@@ -106,12 +106,12 @@ export default function SettingsPage() {
             min={0}
             max={24}
             step={2}
-            onChange={(e: any) => setButtonRadius(Number(e.target.value))}
+            onChange={(e) => setButtonRadius(Number((e.target as HTMLInputElement).value))}
           />
           <s-select
             label="Button Position"
             value={buttonPosition}
-            onChange={(e: any) => setButtonPosition(e.target.value)}
+            onChange={(e) => setButtonPosition((e.target as HTMLSelectElement).value)}
           >
             <option value="below-add-to-cart">Below Add to Cart</option>
             <option value="above-add-to-cart">Above Add to Cart</option>
@@ -121,7 +121,7 @@ export default function SettingsPage() {
           <s-select
             label="Modal Theme"
             value={modalTheme}
-            onChange={(e: any) => setModalTheme(e.target.value)}
+            onChange={(e) => setModalTheme((e.target as HTMLSelectElement).value)}
           >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
@@ -163,7 +163,7 @@ export default function SettingsPage() {
           <s-choice-list
             label="Show try-on button on"
             values={[productRule]}
-            onChange={(e: any) => setProductRule(e.target.value)}
+            onChange={(e) => setProductRule((e.target as HTMLInputElement).value)}
           >
             <s-choice value="all">All products</s-choice>
             <s-choice value="tagged">Products with specific tags</s-choice>
@@ -173,7 +173,7 @@ export default function SettingsPage() {
             <s-text-field
               label="Product Tags"
               value={enabledTags}
-              onChange={(e: any) => setEnabledTags(e.target.value)}
+              onChange={(e) => setEnabledTags((e.target as HTMLInputElement).value)}
               details="Comma-separated tags"
             />
           )}

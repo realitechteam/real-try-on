@@ -106,10 +106,10 @@ async function generateWithFashn(req: TryOnRequest): Promise<TryOnResult> {
       processingTimeMs: Date.now() - startTime,
       provider: "fashn",
     };
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
-      errorMessage: `FASHN error: ${error.message}`,
+      errorMessage: `FASHN error: ${error instanceof Error ? error.message : String(error)}`,
       processingTimeMs: Date.now() - startTime,
       provider: "fashn",
     };
@@ -206,10 +206,10 @@ async function generateWithReplicate(req: TryOnRequest): Promise<TryOnResult> {
       processingTimeMs: Date.now() - startTime,
       provider: "replicate",
     };
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
-      errorMessage: `Replicate error: ${error.message}`,
+      errorMessage: `Replicate error: ${error instanceof Error ? error.message : String(error)}`,
       processingTimeMs: Date.now() - startTime,
       provider: "replicate",
     };
@@ -219,7 +219,8 @@ async function generateWithReplicate(req: TryOnRequest): Promise<TryOnResult> {
 /**
  * Mock Provider (development/testing)
  */
-async function generateWithMock(req: TryOnRequest): Promise<TryOnResult> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function generateWithMock(_req: TryOnRequest): Promise<TryOnResult> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
   return {
     success: true,

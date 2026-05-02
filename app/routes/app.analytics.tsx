@@ -99,7 +99,7 @@ export default function AnalyticsPage() {
             </tr>
           </thead>
           <tbody>
-            {funnel.map((f: any, i: number) => (
+            {funnel.map((f, i) => (
               <tr key={i} style={{ borderBottom: "1px solid #f1f2f3" }}>
                 <td style={{ padding: "8px 12px", fontSize: "14px" }}>{f.step}</td>
                 <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "14px" }}>{f.count}</td>
@@ -124,7 +124,7 @@ export default function AnalyticsPage() {
               </tr>
             </thead>
             <tbody>
-              {topProducts.map((p: any, i: number) => (
+              {topProducts.map((p, i) => (
                 <tr key={i} style={{ borderBottom: "1px solid #f1f2f3" }}>
                   <td style={{ padding: "8px 12px", fontSize: "14px" }}>{p.title}</td>
                   <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "14px" }}>{p.count}</td>

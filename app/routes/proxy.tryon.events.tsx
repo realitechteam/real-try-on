@@ -53,7 +53,7 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     return Response.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error("[Analytics Proxy] Error:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }

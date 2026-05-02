@@ -383,7 +383,9 @@
           sessionId: SESSION_ID,
         }),
       }).catch(function () {});
-    } catch (e) {}
+    } catch (e) {
+      // Silently swallow analytics errors — never block the user flow on telemetry.
+    }
   }
 
   // ── Variant listener ──

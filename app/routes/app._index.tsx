@@ -140,12 +140,12 @@ export default function DashboardPage() {
         {recentGens.length === 0 ? (
           <s-box padding="large-100">
             <s-text color="subdued">
-              No generations yet. Once customers start using Virtual Try-On, you'll see results here.
+              No generations yet. Once customers start using Virtual Try-On, you&apos;ll see results here.
             </s-text>
           </s-box>
         ) : (
           <s-stack direction="block" gap="small">
-            {recentGens.map((gen: any) => (
+            {recentGens.map((gen) => (
               <s-box
                 key={gen.id}
                 padding="base"
