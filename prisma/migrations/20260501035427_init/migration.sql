@@ -84,7 +84,22 @@ CREATE TABLE "AnalyticsEvent" (
 );
 
 -- CreateIndex
+CREATE INDEX "Session_shop_idx" ON "Session"("shop");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Shop_shopDomain_key" ON "Shop"("shopDomain");
+
+-- CreateIndex
+CREATE INDEX "Generation_shopId_createdAt_idx" ON "Generation"("shopId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "Generation_shopId_status_createdAt_idx" ON "Generation"("shopId", "status", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "AnalyticsEvent_shopId_eventType_createdAt_idx" ON "AnalyticsEvent"("shopId", "eventType", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "AnalyticsEvent_shopId_createdAt_idx" ON "AnalyticsEvent"("shopId", "createdAt");
 
 -- AddForeignKey
 ALTER TABLE "Generation" ADD CONSTRAINT "Generation_shopId_fkey" FOREIGN KEY ("shopId") REFERENCES "Shop"("id") ON DELETE CASCADE ON UPDATE CASCADE;
