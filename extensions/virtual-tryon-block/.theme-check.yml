@@ -1,0 +1,15 @@
+# Tighter than Online Store theme defaults — this is an app block
+# bundled with the extension, not arbitrary merchant theme code.
+extends: theme-app-extension
+
+AssetSizeAppBlockJavaScript:
+  # tryon-widget.js is ~15KB un-minified. The default 10KB cap targets
+  # tiny app-block snippets; our widget owns the full try-on UX (camera,
+  # upload, modal, polling) so a single bundle is the right shape.
+  threshold_in_bytes: 25000
+
+RemoteAsset:
+  # The <img src=""> previews are populated at runtime by tryon-widget.js
+  # with shopper photos and AI-generated results — there's no theme asset
+  # to filter through asset_url.
+  enabled: false

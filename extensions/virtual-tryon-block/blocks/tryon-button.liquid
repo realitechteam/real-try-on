@@ -3,6 +3,12 @@
   Premium widget with camera capture + photo upload for AI virtual try-on.
 {% endcomment %}
 
+{%- if block.settings.full_width -%}
+  {%- assign vto_btn_width = '100%' -%}
+{%- else -%}
+  {%- assign vto_btn_width = 'auto' -%}
+{%- endif -%}
+
 <div id="vto-container-{{ block.id }}" class="vto-container" {{ block.shopify_attributes }}>
   <button
     id="vto-trigger-{{ block.id }}"
@@ -13,7 +19,7 @@
       color: {{ block.settings.button_text_color }};
       border-radius: {{ block.settings.button_radius }}px;
       font-size: {{ block.settings.font_size }}px;
-      width: {{ block.settings.full_width | default: false | ternary: '100%', 'auto' }};
+      width: {{ vto_btn_width }};
     "
     data-product-id="{{ product.id }}"
     data-variant-id="{{ product.selected_or_first_available_variant.id }}"
@@ -144,7 +150,7 @@
           <div class="vto-preview-card">
             <p class="vto-preview-card__label">Your Photo</p>
             <div class="vto-preview-card__img-wrap">
-              <img id="vto-person-preview-{{ block.id }}" src="" alt="Your photo">
+              <img id="vto-person-preview-{{ block.id }}" src="" alt="Your photo" width="320" height="480">
             </div>
           </div>
           <div class="vto-preview-card__merge">
@@ -153,7 +159,7 @@
           <div class="vto-preview-card">
             <p class="vto-preview-card__label">{{ product.title }}</p>
             <div class="vto-preview-card__img-wrap">
-              <img id="vto-garment-preview-{{ block.id }}" src="" alt="Garment">
+              <img id="vto-garment-preview-{{ block.id }}" src="" alt="Garment" width="320" height="480">
             </div>
           </div>
         </div>
@@ -187,7 +193,7 @@
       <div class="vto-step" data-step="result" style="display:none">
         <div class="vto-result">
           <div class="vto-result__img-wrap">
-            <img id="vto-result-image-{{ block.id }}" src="" alt="Virtual try-on result" class="vto-result__image">
+            <img id="vto-result-image-{{ block.id }}" src="" alt="Virtual try-on result" class="vto-result__image" width="640" height="960">
           </div>
           <div class="vto-result__actions">
             <button type="button" class="vto-action-btn vto-action-btn--primary" id="vto-add-to-cart-{{ block.id }}">
