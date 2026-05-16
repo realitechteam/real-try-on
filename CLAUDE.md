@@ -51,13 +51,13 @@ All three call `await authenticate.public.appProxy(request)` to verify the HMAC 
 
 Each generation creates a `Generation` row (`status: "processing"` → `"completed"|"failed"`) and a series of `AnalyticsEvent` rows.
 
-### Data model (`prisma/schema.prisma`, SQLite)
+### Data model (`prisma/schema.prisma`, PostgreSQL)
 
 - `Session` — Shopify offline session storage (managed by `@shopify/shopify-app-session-storage-prisma`). Has `refreshToken`/`refreshTokenExpires` because the app opts into the `expiringOfflineAccessTokens` future flag.
 - `Shop` — keyed by `shopDomain`, holds widget customization, product targeting rules, plan/quota. Created/updated in the `afterAuth` hook in `app/shopify.server.ts` — this is the side effect that bridges Shopify auth into our domain model.
 - `Generation`, `AnalyticsEvent` — append-only records cascade-deleted with the shop.
 
-Default datasource is SQLite at `file:dev.sqlite`. For production, change provider in `schema.prisma` (see README's "Application Storage" section for hosted DB options).
+The datasource is `postgresql` (`DATABASE_URL`); migrations live in `prisma/migrations/`. `npm run setup` runs `prisma migrate deploy` — required on a fresh checkout and in the Docker entrypoint.
 
 ### Shopify config (`shopify.app.toml`)
 
@@ -87,6 +87,10 @@ See `.env.example` for the full list. Notable ones:
 - `NODE_ENV=production` in production.
 
 Without `FASHN_API_KEY` and `REPLICATE_API_TOKEN`, the engine falls back to a mock that returns a placeholder image — useful for end-to-end UI testing without burning API credits.
+
+## Deployment
+
+Containerized via `Dockerfile`; the image entrypoint runs `npm run docker-start` (`prisma migrate deploy` then `react-router-serve`). `railway.toml` deploys on Railway using that Dockerfile, with the health/uninstall webhook path wired to `/webhooks/app/uninstalled`. Production requires `DATABASE_URL` (Postgres), the R2 vars, and `SHOPIFY_BILLING_TEST=false`.
 
 ## Shopify Dev MCP
 
